@@ -12,7 +12,14 @@ if root_dir not in sys.path:
 from main.accounts.accounts import Account
 from main.utils.util import css, js, Color
 from main.utils.database import read_log
-from main.trading.trading_floor import names, lastnames, short_model_names, run_every_n_minutes
+from main.trading.trading_floor import (
+    names,
+    lastnames,
+    short_model_names,
+    run_every_n_minutes,
+    request_stop,
+    reset_stop,
+)
 from main.prompts.reset import reset_traders
 
 mapper = {
@@ -27,19 +34,38 @@ mapper = {
 # Additional modern CSS inspired by example_gradio_app.py
 MODERN_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Manrope:wght@400;700;800&display=swap');
-html, body { background: #0b1220; color: #e2e8f0; font-family: Manrope, Inter, Helvetica, Arial, sans-serif; }
+html, body {
+  background: radial-gradient(1000px 600px at 20% -10%, rgba(59,130,246,.12), transparent 60%),
+              radial-gradient(800px 500px at 80% 0%, rgba(236,72,153,.10), transparent 55%),
+              #f8fafc;
+  color: #0b1220;
+  font-family: Manrope, Inter, Helvetica, Arial, sans-serif;
+}
 .gradio-container { max-width: 100% !important; width: 100% !important; margin: 0 auto !important; padding: 0 16px; }
-.brand { font-family: Space Grotesk, Manrope, Inter, sans-serif; font-weight: 800; font-size: 40px; letter-spacing: .3px; background: linear-gradient(90deg,#06b6d4 0%,#a78bfa 45%,#fb7185 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 36px rgba(167,139,250,.35); }
-.subtitle { margin: 8px auto 12px; font-weight: 500; letter-spacing: 0.03em; line-height: 1.6; max-width: 900px; text-align: center; font-size: 1.05rem; color: #cbd5e1; }
+.brand { display:block; text-align:center; font-family: Space Grotesk, Manrope, Inter, sans-serif; font-weight: 800; font-size: 40px; letter-spacing: .3px; background: linear-gradient(90deg,#06b6d4 0%,#a78bfa 45%,#fb7185 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 0 rgba(0,0,0,0), 0 6px 26px rgba(6,182,212,.28), 0 10px 46px rgba(167,139,250,.28), 0 14px 60px rgba(251,113,133,.22); background-size: 200% 200%; animation: brandGlow 8s ease-in-out infinite; }
+@keyframes brandGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+.subtitle { margin: 8px auto 12px; font-weight: 500; letter-spacing: 0.03em; line-height: 1.6; max-width: 900px; text-align: center; font-size: 1.05rem; color: #334155; }
 .center-row { display: flex; justify-content: center; gap: 12px; }
-#run-btn { background: linear-gradient(90deg,#06b6d4,#a78bfa,#fb7185); color: white; padding: 10px 16px; font-size: 14px; border-radius: 10px; border: none; min-width: 140px; max-width: 180px; }
-#reset-btn { background: transparent; color: #93c5fd; padding: 8px 14px; font-size: 13px; border-radius: 10px; border: 1px solid rgba(148,163,184,.35); }
-#stop-btn { background: linear-gradient(90deg,#ef4444,#f97316); color: white; padding: 8px 14px; font-size: 13px; border-radius: 10px; border: none; }
-.disclaimer { background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border: 1px solid rgba(148,163,184,.25); border-radius: 12px; padding: 12px 16px; max-width: 950px; margin: 16px auto 0; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
-.disclaimer .icon { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(90deg,#fde68a,#fbbf24); display: inline-flex; align-items: center; justify-content: center; color: #0b1220; font-weight: 800; }
-.disclaimer .text { color: #e5e7eb; line-height: 1.55; }
+.center-row { display: flex; justify-content: center; gap: 12px; }
+#run-btn, #run-btn button { background: linear-gradient(90deg,#06b6d4,#a78bfa,#fb7185); color: white; padding: 10px 16px; font-size: 14px; border-radius: 12px; border: none; width: 140px; box-shadow: 0 10px 30px rgba(6,182,212,.25), 0 2px 8px rgba(0,0,0,.06); transition: transform .15s ease, box-shadow .2s ease; }
+#run-btn button:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(6,182,212,.32), 0 3px 10px rgba(0,0,0,.08); }
+#reset-btn, #reset-btn button { background: #ffffff; color: #2563eb; padding: 10px 16px; font-size: 14px; border-radius: 12px; border: 1px solid rgba(2,6,23,.12); width: 140px; box-shadow: 0 6px 18px rgba(2,6,23,.06); }
+#stop-btn, #stop-btn button { background: linear-gradient(90deg,#ef4444,#f97316); color: white; padding: 8px 14px; font-size: 13px; border-radius: 10px; border: none; box-shadow: 0 8px 22px rgba(239,68,68,.2); }
+.disclaimer { background: #ffffff; border: 1px solid rgba(2,6,23,.08); border-radius: 14px; padding: 14px 18px; max-width: 900px; margin: 16px auto 0; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 12px 28px rgba(2,6,23,.08); position: relative; overflow: hidden; }
+.disclaimer:before { content:""; position:absolute; inset:-1px; background: linear-gradient(120deg, rgba(6,182,212,.25), rgba(167,139,250,.22), rgba(251,113,133,.22)); filter: blur(24px); opacity: .35; pointer-events:none; }
+.disclaimer .icon { width: 28px; height: 28px; border-radius: 9999px; background: #facc15; display: inline-flex; align-items: center; justify-content: center; color: #0b1220; font-weight: 800; }
+.disclaimer .text { color: #334155; line-height: 1.55; }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 6px; margin-bottom: 8px; }
-.note { color: #93c5fd; font-size: 14px; }
+.note { color: #475569; font-size: 14px; }
+.center-note { text-align: center; color: #475569; font-size: 14px; margin: 6px 0 4px; }
+#stop-btn button:disabled { cursor: not-allowed !important; opacity: .7 !important; }
+/* Soft glow for panels */
+.gr-box, .gr-panel { box-shadow: 0 16px 40px rgba(30,64,175,.08), 0 2px 10px rgba(2,6,23,.04) !important; border-radius: 14px !important; }
+/* Plot container polish */
+.wrap, .container { backdrop-filter: saturate(110%) blur(2px); }
+/* Feature chips */
+.features { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin: 6px auto 4px; }
+.chip { padding:6px 10px; border-radius:9999px; background: linear-gradient(90deg, rgba(6,182,212,.08), rgba(167,139,250,.10)); color:#0b1220; border:1px solid rgba(2,6,23,.08); box-shadow: 0 6px 18px rgba(2,6,23,.06); font-size: 13px; }
 """
 
 
@@ -197,14 +223,16 @@ trading_task = None
 auto_stop_task = None
 stop_requested = False
 
-async def stop_trading(kill_app: bool = False):
+async def stop_trading(kill_app: bool = False, timeout: float = 2.0):
     global trading_task
     try:
         if trading_task and not trading_task.done():
             trading_task.cancel()
             try:
-                await trading_task
+                # Wait briefly for graceful cancellation
+                await asyncio.wait_for(trading_task, timeout=timeout)
             except Exception:
+                # Timeout or CancelledError or other — proceed to clear task
                 pass
     finally:
         trading_task = None
@@ -243,18 +271,43 @@ def create_ui():
                 "Live dashboard of simulated AI traders with portfolios, logs, and performance.",
                 elem_classes=["subtitle"],
             )
+            gr.Markdown(
+                """
+                <div style='text-align:center; max-width: 900px; margin: 4px auto 8px; color:#475569;'>
+                    Four autonomous traders — Value, Macro, Systematic and Crypto — compete in real time. Watch live P&L charts, holdings, and execution logs. Reset instantly to rerun strategies with a fresh slate.
+                </div>
+                """,
+                elem_classes=["subtitle"],
+            )
+            gr.HTML(
+                """
+                <div class='features'>
+                  <div class='chip'>Live AI Traders</div>
+                  <div class='chip'>Auto-refresh Charts</div>
+                  <div class='chip'>Reset in 1 Click</div>
+                  <div class='chip'>10-min Budget Guard</div>
+                  <div class='chip'>SQLite Persistence</div>
+                  <div class='chip'>Sleek Light UI</div>
+                </div>
+                """
+            )
             gr.HTML(
                 """
                 <div class='disclaimer'>
                   <div class='icon'>!</div>
                   <div class='text'>
-                    <strong>Disclaimer:</strong> This application is for educational and informational purposes only. Do not make financial decisions based on its outputs. The author is not liable for any financial loss. The session will run for <strong>10 minutes</strong> unless you stop it earlier.
+                    <strong>Disclaimer:</strong> This application is for educational and informational purposes only. Do not make financial decisions based on its outputs. The author is not liable for any financial loss.
                   </div>
                 </div>
                 """
             )
+            # Centered Run button only
             with gr.Row(elem_classes=["center-row"]):
                 run_button = gr.Button("Run", variant="primary", elem_id="run-btn")
+            # Session duration note above Reset
+            gr.Markdown("This session will run for up to 10 minutes unless you stop it earlier.", elem_classes=["center-note"])
+            # Reset button below Run
+            with gr.Row(elem_classes=["center-row"]):
                 reset_button = gr.Button("Reset", variant="secondary", elem_id="reset-btn")
             reset_status = gr.HTML(visible=False)
 
@@ -271,6 +324,8 @@ def create_ui():
         async def on_run_click():
             global trading_task, auto_stop_task, stop_requested
             stop_requested = False
+            # Clear any prior stop signal before starting
+            reset_stop()
             if trading_task is None or trading_task.done():
                 trading_task = asyncio.create_task(run_every_n_minutes())
             # auto stop after 10 minutes unless stopped
@@ -287,16 +342,23 @@ def create_ui():
 
         async def on_stop_click():
             global auto_stop_task, stop_requested
+            # 1) Immediate UI update
+            yield gr.update(value="Stopped", interactive=False)
+            # 2) Cancel timers & background loop
             stop_requested = True
+            # Signal cooperative stop to trading loop
+            try:
+                request_stop()
+            except Exception:
+                pass
             if auto_stop_task and not auto_stop_task.done():
-                auto_stop_task.cancel()
                 try:
-                    await auto_stop_task
+                    auto_stop_task.cancel()
                 except Exception:
                     pass
             await stop_trading(kill_app=False)
-            # Keep dashboard visible but user can relaunch if desired
-            return gr.update(interactive=False)
+            # 3) Idempotent final state
+            yield gr.update(value="Stopped", interactive=False)
 
         run_button.click(
             fn=on_run_click,
