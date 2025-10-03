@@ -1,0 +1,36 @@
+[project]
+name = "auto-ai-agents-creator"
+version = "0.1.0"
+description = "auto-ai-agents-creator using Autogen"
+authors = [{ name = "Kaushik Paul", email = "kaushik.paul755@gmail.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "openai>=1.109.1",
+    "openai-agents>=0.3.3",
+    "mailjet-rest>=1.5.1",
+    "bs4>=0.0.2",
+    "gradio>=5.47.2",
+    "httpx==0.28.1",
+    "ipywidgets>=8.1.5",
+    "litellm==1.74.3",
+    "lxml>=5.3.1",
+    "mcp-server-fetch>=2025.1.7",
+    "mcp[cli]>=1.5.0",
+    "playwright>=1.55.0",
+    "plotly>=6.0.1",
+    "polygon-api-client>=1.15.4",
+    "psutil>=7.0.0",
+    "pypdf>=5.4.0",
+    "pypdf2>=3.0.1",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.3",
+    "semantic-kernel>=1.25.0",
+    "setuptools>=78.1.0",
+    "smithery>=0.1.0",
+    "google-cloud-storage>=3.3.1",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
