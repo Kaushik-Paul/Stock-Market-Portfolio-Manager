@@ -38,16 +38,39 @@ def create_traders() -> List[Trader]:
         traders.append(Trader(name, lastname, model_name))
     return traders
 
+# Cooperative cancellation for external controllers (e.g., Gradio UI)
+STOP_EVENT: asyncio.Event = asyncio.Event()
+
+def request_stop() -> None:
+    """Signal the trading loop to stop at the soonest safe point."""
+    STOP_EVENT.set()
+
+def reset_stop() -> None:
+    """Clear the stop flag before starting a new run."""
+    try:
+        STOP_EVENT.clear()
+    except Exception:
+        # In rare cases if STOP_EVENT was not initialized, recreate it
+        globals()["STOP_EVENT"] = asyncio.Event()
+
 
 async def run_every_n_minutes():
     add_trace_processor(LogTracer())
     traders = create_traders()
-    while True:
-        if RUN_EVEN_WHEN_MARKET_IS_CLOSED or is_market_open():
-            await asyncio.gather(*[trader.run() for trader in traders])
-        else:
-            print("Market is closed, skipping run")
-        await asyncio.sleep(RUN_EVERY_N_SECONDS)
+    try:
+        while not STOP_EVENT.is_set():
+            if RUN_EVEN_WHEN_MARKET_IS_CLOSED or is_market_open():
+                await asyncio.gather(*[trader.run() for trader in traders])
+            else:
+                print("Market is closed, skipping run")
+            # Wait either until next tick or until stop requested
+            try:
+                await asyncio.wait_for(STOP_EVENT.wait(), timeout=RUN_EVERY_N_SECONDS)
+            except asyncio.TimeoutError:
+                # timeout means continue next cycle
+                pass
+    finally:
+        return
 
 
 if __name__ == "__main__":
