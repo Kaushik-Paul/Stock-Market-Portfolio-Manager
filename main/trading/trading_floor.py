@@ -13,23 +13,23 @@ if root_dir not in sys.path:
 from main.trading.traders import Trader
 from main.utils.tracers import LogTracer
 from main.markets.market import is_market_open
-import main.constants
+import main.utils.constants as constants
 
 load_dotenv(override=True)
 
-RUN_EVERY_N_SECONDS = main.constants.RUN_EVERY_N_SECONDS
-RUN_EVEN_WHEN_MARKET_IS_CLOSED = main.constants.RUN_EVEN_WHEN_MARKET_IS_CLOSED
-USE_MANY_MODELS = main.constants.USE_MANY_MODELS
+RUN_EVERY_N_SECONDS = constants.RUN_EVERY_N_SECONDS
+RUN_EVEN_WHEN_MARKET_IS_CLOSED = constants.RUN_EVEN_WHEN_MARKET_IS_CLOSED
+USE_MANY_MODELS = constants.USE_MANY_MODELS
 
 names = ["Warren", "George", "Ray", "Cathie"]
 lastnames = ["Patience", "Bold", "Systematic", "Crypto"]
 
 if USE_MANY_MODELS:
-    model_names = main.constants.MANY_MODELS_NAMES
-    short_model_names = main.constants.MANY_MODELS_SHORT_NAMES
+    model_names = constants.MANY_MODELS_NAMES
+    short_model_names = constants.MANY_MODELS_SHORT_NAMES
 else:
-    model_names = [main.constants.DEFAULT_MODEL_NAME] * 4
-    short_model_names = [main.constants.DEFAULT_MODEL_SHORT_NAME] * 4
+    model_names = [constants.DEFAULT_MODEL_NAME] * 4
+    short_model_names = [constants.DEFAULT_MODEL_SHORT_NAME] * 4
 
 
 def create_traders() -> List[Trader]:
