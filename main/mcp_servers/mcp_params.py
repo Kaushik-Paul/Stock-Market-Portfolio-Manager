@@ -31,23 +31,13 @@ else:
 accounts_module = "main.mcp_servers.accounts_server"
 email_module = "main.mcp_servers.email_server"
 
-# Debug: Print the paths to verify they're correct
-# print(f"DEBUG: root_dir = {root_dir}")
-# print(f"DEBUG: sys.executable = {sys.executable}")
-# print(f"DEBUG: accounts_module = {accounts_module}")
-# print(f"DEBUG: email_module = {email_module}")
-# print(f"DEBUG: market_module = {market_module}")
-
 trader_mcp_server_params = [
     {"command": sys.executable, "args": ["-m", accounts_module]},
     {"command": sys.executable, "args": ["-m", email_module]},
     market_mcp,
 ]
 
-# print(f"DEBUG: trader_mcp_server_params = {trader_mcp_server_params}")
-
 # The full set of MCP servers for the researcher: Fetch, Brave Search and Memory
-
 
 def researcher_mcp_server_params(name: str):
     return [
