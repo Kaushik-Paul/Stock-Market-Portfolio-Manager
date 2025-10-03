@@ -1,12 +1,34 @@
 import sqlite3
+import os
 import json
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-DB = "accounts.memory"
+# Compute persistent DB location under main/memory/
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+MEMORY_DIR = os.path.join(PROJECT_ROOT, "main", "memory")
+os.makedirs(MEMORY_DIR, exist_ok=True)
 
+NEW_DB_PATH = os.path.join(MEMORY_DIR, "accounts.memory")
+OLD_DB_PATHS = [
+    os.path.join(PROJECT_ROOT, "accounts.memory"),
+    os.path.join(PROJECT_ROOT, "accounts.db"),
+]
+
+# Migrate legacy DB files if present
+if not os.path.exists(NEW_DB_PATH):
+    for old_path in OLD_DB_PATHS:
+        if os.path.exists(old_path):
+            try:
+                os.replace(old_path, NEW_DB_PATH)
+                break
+            except Exception:
+                # Best-effort move; fall back to creating a new DB
+                pass
+
+DB = NEW_DB_PATH
 
 with sqlite3.connect(DB) as conn:
     cursor = conn.cursor()

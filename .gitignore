@@ -175,13 +175,6 @@ cython_debug/
 
 .DS_Store
 
-# Ignore Crew engineering team output
-3_crew/engineering_team/output/
-
-# Ignore Accounts database in capstone project
-6_mcp/accounts.db
-6_mcp/memory/*.db
-
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm+all,visualstudiocode,python,windows,linux,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm+all,visualstudiocode,python,windows,linux,macos
 
@@ -388,16 +381,3 @@ ignore.txt
 # Virtual Environment
 .venv/
 
-# -----------------------------------------------------------------------------
-# Project-specific ignores
-# -----------------------------------------------------------------------------
-
-# 1. Ignore *all* files in the ideas folder, but keep the folder itself.
-#    (Add an empty ideas/.gitkeep file so the directory stays in the repo.)
-ideas/*
-!ideas/.gitkeep
-
-# 2. Ignore dynamically generated agents (agent1.py, agent42.py …) inside main/
-#    but keep the template main/agent.py under version control.
-main/agent*.py
-!main/agent.py
