@@ -15,16 +15,21 @@ This project showcases:
 - Visit: https://projects.kaushikpaul.pp.ua/stock-market-agent
 
 ## Features
-- __Four autonomous traders__: Warren (Value), George (Macro), Ray (Systematic), Cathie (Crypto ETFs)
-- __Gradio dashboard__: Live P&L, holdings, transactions, and log streams
-- __Reset anytime__: Reinitialize all traders and strategies in one click
-- __Timed sessions__: Auto-stop guard to cap long runs
-- __Persistent state__: SQLite database under `main/memory/`
-- __MCP tooling__:
-  - Accounts Server: trade, balances, holdings (see `main/mcp_servers/accounts_server.py`)
-  - Market Server: share price lookup with Polygon fallback (see `main/mcp_servers/market_server.py`)
-  - Email Server: send Mailjet emails (see `main/mcp_servers/email_server.py`)
-  - Research stack: fetch, Brave Search, and per-trader memory
+- __AI-Powered Trading Bots__: Four autonomous traders with unique strategies inspired by famous investors - Warren (Value), George (Macro), Ray (Systematic), and Cathie (Crypto ETFs)
+- __Real-time Market Intelligence__: Agents perform live web research using Brave Search to analyze company performance before making trading decisions
+- __Professional-Grade Data__: Integrates with Polygon API for real-time and historical market data with automatic fallback to simulated data
+- __Interactive Dashboard__: Beautiful Gradio interface with live portfolio tracking, transaction history, and real-time logs
+- __Smart Trading Logic__: Each agent makes independent decisions based on technical analysis, news sentiment, and market trends
+- __Persistent Performance Tracking__: SQLite database maintains complete trading history and portfolio performance
+- __Email Notifications__: Get alerts for important trading events and portfolio milestones via Mailjet
+- __Research Capabilities__: Built-in web search and data analysis tools for comprehensive market research
+- __Configurable Strategies__: Easily customize trading parameters and risk profiles for each agent
+- __No-Code Operation__: Simple web interface with one-click start/stop controls
+
+> ⚠️ **IMPORTANT FINANCIAL DISCLAIMER**  
+> This application is for educational and demonstration purposes only. The AI agents' trading decisions are simulated and should not be considered financial advice. The stock market involves substantial risk of loss, and past performance is not indicative of future results.  
+>  
+> **Never invest money you cannot afford to lose.** Always conduct your own market research and consult with a qualified financial advisor before making any investment decisions. The author of this project is not responsible for any financial loss or damage resulting from the use of this application.
 
 ## Architecture Overview
 - __Entrypoint__: `main/app.py` (launches Gradio UI)
@@ -55,10 +60,11 @@ This project showcases:
 - Python 3.10–3.12
 - pip or uv (recommended)
 - Node.js and npx (for MCP servers used by research; see `main/mcp_servers/mcp_params.py`)
+- OpenRouter API key (required for AI models)
 - Optional external services:
-  - Polygon API (live or EOD prices)
-  - Brave Search API (research)
-  - Mailjet API (email notifications)
+  - Polygon API (for real market data instead of simulated data)
+  - Brave Search API (for web research capabilities)
+  - Mailjet API (for email notifications)
 
 ## Quick Start
 
@@ -93,25 +99,38 @@ pip install -r requirements.txt
 These are the environment variables the code reads. Only set what you actually use.
 
 ```ini
+# ——— Required API Keys ———
+
+# OpenRouter API (Required for AI models)
+# Get your API key from https://openrouter.ai/keys
+OPENROUTER_API_KEY=your_openrouter_key
+
 # ——— Market Data (Polygon) ———
-# If absent, app falls back to pseudo-random prices for symbols.
+# Get your API key from https://polygon.io/
+# If not provided, the app will use simulated market data
 POLYGON_API_KEY=your_polygon_key
-# one of: "" (unset), "paid", "realtime"
+# Set to "paid" or "realtime" for live market data, or leave empty for EOD data
 POLYGON_PLAN=paid
 
-# ——— Research (Brave Search MCP) ———
-# Enables @modelcontextprotocol/server-brave-search via npx.
+# ——— Research (Brave Search) ———
+# Required for web research functionality
+# Get your API key from https://api.search.brave.com/app/keys
 BRAVE_API_KEY=your_brave_api_key
 
-# ——— Email (Mailjet) ———
+# ——— Email Notifications (Mailjet) ———
+# Optional: For email alerts and notifications
+# Get your API keys from https://app.mailjet.com/account/api_keys
 MAILJET_API_KEY=your_mailjet_key
 MAILJET_API_SECRET=your_mailjet_secret
 
-# Note: Model selection is done via LiteLLM-style names in `main/utils/constants.py`.
-# If you use an OpenRouter-backed model with LiteLLM, set provider vars as needed in your environment.
-# Example (only if your LiteLLM setup requires it):
-# OPENROUTER_API_KEY=your_openrouter_key
+# ——— Advanced Configuration ———
+# Uncomment and set these only if using a custom LiteLLM configuration
 # OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+# LITELLM_MODEL=openrouter/your-model-name
+
+# ——— Development Settings ———
+# Set to "true" to enable debug logging
+DEBUG=false
 ```
 
 ### 5) Run locally
@@ -160,11 +179,16 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
   - Expose the Gradio service behind a reverse proxy (e.g., Nginx) with TLS
 
 ## Troubleshooting
-- __No Polygon key__: Prices fall back to random; set `POLYGON_API_KEY` for real data.
-- __Brave Search failures__: Set `BRAVE_API_KEY` and ensure `npx` is available.
-- __Email errors__: Verify `MAILJET_API_KEY` and `MAILJET_API_SECRET`. Sender/recipient are configured in `main/mcp_servers/email_server.py`.
-- __Node/npx not found__: Install Node.js and ensure `npx` is on PATH.
-- __uv/uvx warnings__: `uvx` is only ensured in hosted environments (when `SPACE_ID` is present). Locally you can ignore.
+- __No Polygon key__: Prices fall back to random; set `POLYGON_API_KEY` for real data. Free tier provides delayed data.
+- __Missing OpenRouter API key__: Get a key from [OpenRouter](https://openrouter.ai/keys) and set `OPENROUTER_API_KEY` in your `.env` file.
+- __Model access issues__: Ensure your OpenRouter account has access to the model specified in `main/utils/constants.py`.
+- __Brave Search failures__: Set `BRAVE_API_KEY` and ensure `npx` is available. Check your daily quota at [Brave Search API](https://api.search.brave.com/app/brave-usage).
+- __Email errors__: Verify `MAILJET_API_KEY` and `MAILJET_API_SECRET`. Check sender/recipient settings in `main/mcp_servers/email_server.py`.
+- __Node/npx not found__: Install Node.js (v16+) and ensure `npx` is on your PATH. On Ubuntu/Debian: `sudo apt install nodejs npm`
+- __uv/uvx warnings__: `uvx` is only ensured in hosted environments. For local development, you can safely ignore these warnings.
+- __Port conflicts__: If the app fails to start, check if port 7860 is in use. Change the port in `main/app.py` if needed.
+- __Database issues__: If you encounter database errors, try deleting the `main/memory/` directory (backup first if needed).
+- __Slow performance__: Reduce the number of active traders or increase the `RUN_EVERY_N_SECONDS` value in `main/utils/constants.py`.
 
 ## Tech Stack
 - __Python__: 3.10–3.12
@@ -179,12 +203,10 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 - Logs and state are stored locally under `main/memory/`.
 
 ## License
-MIT — see `LICENSE`.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 - Polygon, Brave Search MCP, MCP community
 - Gradio, Plotly
 - openai-agents and related tooling
 
-## Financial Disclaimer
-Do not make financial decisions based on the AI agents' recommendations. This application is for educational and informational purposes only. Always do your own market research. The author of this project is not responsible for any financial loss if used.
