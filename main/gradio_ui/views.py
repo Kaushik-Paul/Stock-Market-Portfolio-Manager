@@ -50,17 +50,59 @@ class Trader:
     def get_portfolio_value_chart(self):
         df = self.get_portfolio_value_df()
         fig = px.line(df, x="datetime", y="value")
+        
+        # Get theme colors based on current theme
+        text_color = "#0b1220"  # Default light theme text
+        grid_color = "rgba(0,0,0,0.1)"  # Default light theme grid
+        
+        # Try to detect dark theme
+        try:
+            import js
+            if js.document.documentElement.classList.contains('dark'):
+                text_color = "#f8fafc"
+                grid_color = "rgba(255,255,255,0.1)"
+        except:
+            pass
+            
         margin = dict(l=40, r=20, t=20, b=40)
         fig.update_layout(
             height=300,
             margin=margin,
             xaxis_title=None,
             yaxis_title=None,
-            paper_bgcolor="#bbb",
-            plot_bgcolor="#dde",
+            paper_bgcolor="var(--panel-bg, #ffffff)",
+            plot_bgcolor="var(--panel-bg, #f8f9fa)",
+            font=dict(color=text_color),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor=grid_color,
+                tickformat="%m/%d",
+                tickangle=45,
+                tickfont=dict(size=8, color=text_color),
+                linecolor=grid_color,
+                zerolinecolor=grid_color
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor=grid_color,
+                tickfont=dict(size=8, color=text_color),
+                tickformat=",.0f",
+                linecolor=grid_color,
+                zerolinecolor=grid_color
+            ),
+            hoverlabel=dict(
+                bgcolor="var(--panel-bg, #ffffff)",
+                font_size=12,
+                font_family="Manrope, sans-serif"
+            )
         )
-        fig.update_xaxes(tickformat="%m/%d", tickangle=45, tickfont=dict(size=8))
-        fig.update_yaxes(tickfont=dict(size=8), tickformat=",.0f")
+        
+        # Update line color for better visibility
+        fig.update_traces(
+            line=dict(color='#3b82f6', width=2.5),
+            hovertemplate='%{y:$,.0f}<extra></extra>'
+        )
+        
         return fig
 
     def get_holdings_df(self) -> pd.DataFrame:

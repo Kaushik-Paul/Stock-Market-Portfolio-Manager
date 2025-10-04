@@ -121,10 +121,11 @@ def create_ui():
                 run_button = gr.Button("Run", variant="primary", elem_id="run-btn")
                 reset_button = gr.Button("Reset", variant="secondary", elem_id="reset-btn")
             # Session duration note below buttons
-            gr.Markdown(
-                "This session will run for up to 10 minutes unless you stop it early.",
-                elem_classes=["center-note"],
-            )
+            with gr.Row(elem_classes=["center-row"]):
+                gr.Markdown(
+                    "This session will run for up to 10 minutes unless you stop it early.",
+                    elem_classes=["center-note"],
+                )
             reset_status = gr.HTML(visible=False)
 
         # Traders dashboard (hidden until Run is clicked)
