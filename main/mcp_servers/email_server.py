@@ -17,22 +17,23 @@ class EmailBodyArgs(BaseModel):
 def send_email(args: EmailBodyArgs):
     """Send an email with this brief message"""
 
-    print(f"EMAIL BODY: {args.message}")
-
     api_key = os.getenv("MAILJET_API_KEY")
     api_secret = os.getenv("MAILJET_API_SECRET")
+    from_email = os.getenv("MAILJET_FROM_EMAIL")
+    to_email = os.getenv("MAILJET_TO_EMAIL")
+
     mailjet = Client(auth=(api_key, api_secret), version='v3.1')
     data = {
         'Messages': [
             {
                 "From": {
-                    "Email": "kprocks911@gmail.com",
-                    "Name": "Tony Stark"
+                    "Email": from_email,
+                    "Name": "AI Agents Trader"
                 },
                 "To": [
                     {
-                        "Email": "kprocks45@gmail.com",
-                        "Name": "CEO Emails"
+                        "Email": to_email,
+                        "Name": "Portfolio Owner"
                     }
                 ],
                 "Subject": "Trade Analysis",

@@ -122,6 +122,9 @@ BRAVE_API_KEY=your_brave_api_key
 # Get your API keys from https://app.mailjet.com/account/api_keys
 MAILJET_API_KEY=your_mailjet_key
 MAILJET_API_SECRET=your_mailjet_secret
+# Sender and recipient email addresses
+FROM_EMAIL=your_sender@example.com
+TO_EMAIL=your_recipient@example.com
 
 # ——— Advanced Configuration ———
 # Uncomment and set these only if using a custom LiteLLM configuration
@@ -209,4 +212,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - Polygon, Brave Search MCP, MCP community
 - Gradio, Plotly
 - openai-agents and related tooling
-
