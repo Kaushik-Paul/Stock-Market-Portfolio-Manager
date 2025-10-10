@@ -1,6 +1,6 @@
 # Stock Market Portfolio Manager
 
-[![Live Website](https://img.shields.io/badge/Live_Website-6c63ff?logo=rocket&logoColor=white&labelColor=5a52d3)](https://projects.kaushikpaul.pp.ua/stock-market-agent)
+[![Live Website](https://img.shields.io/badge/Live_Website-6c63ff?logo=rocket&logoColor=white&labelColor=5a52d3)](https://projects.kaushikpaul.co.in/stock-market-agent)
 
 An AI-driven, educational stock trading simulator with four autonomous trader personas. Watch them research, make decisions, execute trades, and track portfolio performance in a modern Gradio dashboard.
 
@@ -12,7 +12,7 @@ This project showcases:
 - A polished, responsive UI with live charts and tables
 
 ## Live Demo
-- Visit: https://projects.kaushikpaul.pp.ua/stock-market-agent
+- Visit: https://projects.kaushikpaul.co.in/stock-market-agent
 
 ## Features
 - __AI-Powered Trading Bots__: Four autonomous traders with unique strategies inspired by famous investors - Warren (Value), George (Macro), Ray (Systematic), and Cathie (Crypto ETFs)
@@ -173,7 +173,7 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 
 ## Deployment
 
-- __Live Site__: https://projects.kaushikpaul.pp.ua/stock-market-agent
+- __Live Site__: https://projects.kaushikpaul.co.in/stock-market-agent
 - __General guidance__:
   - Set environment variables for any external tools you enable
   - Run `python -m main.app` under a process manager (systemd, pm2, supervisor) or a container
