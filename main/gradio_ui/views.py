@@ -175,7 +175,7 @@ class TraderView:
                     label="Holdings",
                     headers=["Symbol", "Quantity"],
                     row_count=(5, "dynamic"),
-                    col_count=2,
+                    column_count=2,
                     max_height=300,
                     elem_classes=["dataframe-fix-small"],
                 )
@@ -185,7 +185,7 @@ class TraderView:
                     label="Recent Transactions",
                     headers=["Timestamp", "Symbol", "Quantity", "Price", "Rationale"],
                     row_count=(5, "dynamic"),
-                    col_count=5,
+                    column_count=5,
                     elem_classes=["dataframe-fix"],
                 )
 

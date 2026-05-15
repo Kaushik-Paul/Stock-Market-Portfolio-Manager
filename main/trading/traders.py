@@ -1,6 +1,7 @@
 from contextlib import AsyncExitStack
-from agents import Agent, Tool, Runner, trace
-from openai import AsyncOpenAI
+from typing import Union
+
+from agents import Agent, Model, Tool, Runner, trace
 from dotenv import load_dotenv
 import json
 from agents.mcp import MCPServerStdio
@@ -26,17 +27,20 @@ load_dotenv(override=True)
 
 MAX_TURNS = 30
 
-def get_model(model_name: str):
+AgentModel = Union[str, Model]
+
+
+def get_model(model_name: AgentModel) -> AgentModel:
     """
-    Return the model name as is,
-    can be a path to a local model or a model name from litellm
-    or add other clients
+    Return the configured model as-is.
+
+    It can be a LiteLLM-style model string or an Agents SDK Model instance.
     """
 
     return model_name
 
 
-async def get_researcher(mcp_servers, model_name) -> Agent:
+async def get_researcher(mcp_servers, model_name: AgentModel) -> Agent:
     researcher = Agent(
         name="Researcher",
         instructions=researcher_instructions(),
@@ -46,13 +50,13 @@ async def get_researcher(mcp_servers, model_name) -> Agent:
     return researcher
 
 
-async def get_researcher_tool(mcp_servers, model_name) -> Tool:
+async def get_researcher_tool(mcp_servers, model_name: AgentModel) -> Tool:
     researcher = await get_researcher(mcp_servers, model_name)
     return researcher.as_tool(tool_name="Researcher", tool_description=research_tool())
 
 
 class Trader:
-    def __init__(self, name: str, lastname="Trader", model_name="litellm/openrouter/x-ai/grok-4-fast:free"):
+    def __init__(self, name: str, lastname="Trader", model_name: AgentModel = "litellm/openrouter/x-ai/grok-4-fast:free"):
         self.name = name
         self.lastname = lastname
         self.agent = None

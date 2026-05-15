@@ -60,7 +60,7 @@ This project showcases:
 - Python 3.10–3.12
 - pip or uv (recommended)
 - Node.js and npx (for MCP servers used by research; see `main/mcp_servers/mcp_params.py`)
-- OpenRouter API key (required for AI models)
+- OpenRouter API key or OpenCode Go API key (required for AI models)
 - Optional external services:
   - Polygon API (for real market data instead of simulated data)
   - Brave Search API (for web research capabilities)
@@ -99,11 +99,24 @@ pip install -r requirements.txt
 These are the environment variables the code reads. Only set what you actually use.
 
 ```ini
-# ——— Required API Keys ———
+# ——— Model Provider ———
 
-# OpenRouter API (Required for AI models)
-# Get your API key from https://openrouter.ai/keys
+# Use OpenRouter when true, OpenCode Go when false.
+USE_OPENROUTER=true
+
+# OpenRouter
 OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_MODEL=x-ai/grok-4-fast:free
+# Optional display label in the UI
+OPENROUTER_MODEL_SHORT_NAME=Grok 4 Fast
+
+# OpenCode Go
+OPENCODE_GO_API_KEY=your_opencode_go_key
+OPENCODE_GO_MODEL=minimax-m2.7
+# Optional: auto, openai, or anthropic. Leave as auto for normal use.
+OPENCODE_GO_API_STYLE=auto
+# Optional display label in the UI
+OPENCODE_GO_MODEL_SHORT_NAME=MiniMax M2.7
 
 # ——— Market Data (Polygon) ———
 # Get your API key from https://polygon.io/
@@ -126,11 +139,6 @@ MAILJET_API_SECRET=your_mailjet_secret
 FROM_EMAIL=your_sender@example.com
 TO_EMAIL=your_recipient@example.com
 
-# ——— Advanced Configuration ———
-# Uncomment and set these only if using a custom LiteLLM configuration
-# OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-# LITELLM_MODEL=openrouter/your-model-name
-
 # ——— Development Settings ———
 # Set to "true" to enable debug logging
 DEBUG=false
@@ -152,11 +160,13 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 
 ## Configuration
 
-- __Scheduling & models__: `main/utils/constants.py`
+- __Scheduling__: `main/utils/constants.py`
   - `RUN_EVERY_N_SECONDS` — cadence for trading loop
   - `RUN_EVEN_WHEN_MARKET_IS_CLOSED` — run regardless of market hours
-  - `USE_MANY_MODELS` — toggle per-trader model names vs a default
-  - `MANY_MODELS_NAMES`, `MANY_MODELS_SHORT_NAMES`, `DEFAULT_MODEL_NAME`
+- __Models__: `main/utils/model_client.py`
+  - `USE_OPENROUTER=true` uses `OPENROUTER_MODEL`
+  - `USE_OPENROUTER=false` uses `OPENCODE_GO_MODEL`
+  - OpenCode Go auto-selects the OpenAI-compatible or Anthropic-compatible endpoint at runtime
 - __Trader strategies__: `main/prompts/reset.py`
 - __Trading loop__: `main/trading/trading_floor.py`
 - __MCP servers__: `main/mcp_servers/mcp_params.py`
@@ -174,6 +184,10 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 ## Deployment
 
 - __Live Site__: https://projects.kaushikpaul.co.in/stock-market-agent
+- __Hugging Face Space__:
+  - Set `HF_TOKEN` or log in with the Hugging Face CLI
+  - Set `HF_SPACE_ID=kaushikpaul/Stock-Market-Portfolio-Manager` if deploying to a different Space ID
+  - Run `python scripts/deploy_space.py`
 - __General guidance__:
   - Set environment variables for any external tools you enable
   - Run `python -m main.app` under a process manager (systemd, pm2, supervisor) or a container
@@ -183,8 +197,8 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 
 ## Troubleshooting
 - __No Polygon key__: Prices fall back to random; set `POLYGON_API_KEY` for real data. Free tier provides delayed data.
-- __Missing OpenRouter API key__: Get a key from [OpenRouter](https://openrouter.ai/keys) and set `OPENROUTER_API_KEY` in your `.env` file.
-- __Model access issues__: Ensure your OpenRouter account has access to the model specified in `main/utils/constants.py`.
+- __Missing model API key__: If `USE_OPENROUTER=true`, set `OPENROUTER_API_KEY`. If `USE_OPENROUTER=false`, set `OPENCODE_GO_API_KEY`.
+- __Model access issues__: Ensure the selected account has access to the model specified by `OPENROUTER_MODEL` or `OPENCODE_GO_MODEL`.
 - __Brave Search failures__: Set `BRAVE_API_KEY` and ensure `npx` is available. Check your daily quota at [Brave Search API](https://api.search.brave.com/app/brave-usage).
 - __Email errors__: Verify `MAILJET_API_KEY` and `MAILJET_API_SECRET`. Check sender/recipient settings in `main/mcp_servers/email_server.py`.
 - __Node/npx not found__: Install Node.js (v16+) and ensure `npx` is on your PATH. On Ubuntu/Debian: `sudo apt install nodejs npm`

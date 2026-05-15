@@ -5,14 +5,15 @@ description = "auto-ai-agents-creator using Autogen"
 authors = [{ name = "Kaushik Paul", email = "kaushik.paul755@gmail.com" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "openai>=1.109.1",
-    "openai-agents>=0.3.3",
+    "openai>=2.36.0",
+    "openai-agents>=0.17.2",
     "mailjet-rest>=1.5.1",
     "bs4>=0.0.2",
-    "gradio>=5.47.2",
+    "gradio>=6.14.0",
+    "huggingface-hub>=1.15.0",
     "httpx==0.28.1",
     "ipywidgets>=8.1.5",
-    "litellm==1.74.3",
+    "litellm>=1.84.0",
     "lxml>=5.3.1",
     "mcp-server-fetch>=2025.1.7",
     "mcp[cli]>=1.5.0",
@@ -24,7 +25,6 @@ dependencies = [
     "pypdf2>=3.0.1",
     "python-dotenv>=1.1.1",
     "requests>=2.32.3",
-    "semantic-kernel>=1.25.0",
     "setuptools>=78.1.0",
     "smithery>=0.1.0",
     "google-cloud-storage>=3.3.1",

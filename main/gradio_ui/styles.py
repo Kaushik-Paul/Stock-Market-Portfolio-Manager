@@ -17,6 +17,10 @@ MODERN_CSS = """
   --note-color: #475569;
 }
 
+#dashboard-section {
+  display: none;
+}
+
 .dark {
   --bg-primary: #0f172a;
   --text-primary: #f8fafc;

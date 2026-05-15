@@ -24,6 +24,23 @@ from main.gradio_ui.views import TraderView, Trader
 trading_task = None
 auto_stop_task = None
 stop_requested = False
+LAUNCH_KWARGS = {
+    "css": css + MODERN_CSS,
+    "js": js,
+    "theme": gr.themes.Default(primary_hue="indigo"),
+}
+RUN_BUTTON_JS = """
+() => {
+  const intro = document.getElementById("intro-section");
+  const dashboard = document.getElementById("dashboard-section");
+  if (intro) {
+    intro.style.display = "none";
+  }
+  if (dashboard) {
+    dashboard.style.display = "block";
+  }
+}
+"""
 
 
 async def stop_trading(kill_app: bool = False, timeout: float = 2.0):
@@ -74,13 +91,10 @@ def create_ui():
 
     with gr.Blocks(
         title="Traders",
-        css=css + MODERN_CSS,
-        js=js,
-        theme=gr.themes.Default(primary_hue="indigo"),
         fill_width=True,
     ) as ui:
         # Intro / Landing section
-        with gr.Column(variant="panel", visible=True) as intro_group:
+        with gr.Column(variant="panel", visible=True, elem_id="intro-section") as intro_group:
             gr.Markdown("# Stock Market Portfolio Manager", elem_classes=["brand"])
             gr.Markdown(
                 "Live dashboard of simulated AI traders with portfolios, logs, and performance.",
@@ -129,7 +143,7 @@ def create_ui():
             reset_status = gr.HTML(visible=False)
 
         # Traders dashboard (hidden until Run is clicked)
-        with gr.Column(visible=False) as dashboard_group:
+        with gr.Column(visible=True, elem_id="dashboard-section") as dashboard_group:
             with gr.Row(elem_classes=["topbar"]):
                 gr.Markdown(
                     "Session runs for up to 10 minutes. Click Stop to end early.",
@@ -140,8 +154,8 @@ def create_ui():
                 for trader_view in trader_views:
                     trader_view.make_ui()
 
-        # Start background loop and toggle visibility
-        async def on_run_click():
+        # Start background loop after JS has already moved to the dashboard.
+        async def start_trading():
             global trading_task, auto_stop_task, stop_requested
             stop_requested = False
             # Clear any prior stop signal before starting
@@ -151,7 +165,6 @@ def create_ui():
             # auto stop after 10 minutes unless stopped
             if auto_stop_task is None or auto_stop_task.done():
                 auto_stop_task = asyncio.create_task(auto_stop_after_duration(600))
-            return gr.update(visible=False), gr.update(visible=True)
 
         def on_reset_click():
             try:
@@ -186,10 +199,12 @@ def create_ui():
             yield gr.update(value="Stopped", interactive=False)
 
         run_button.click(
-            fn=on_run_click,
+            fn=start_trading,
             inputs=[],
-            outputs=[intro_group, dashboard_group],
+            outputs=[],
             show_progress="hidden",
+            queue=False,
+            js=RUN_BUTTON_JS,
         )
 
         reset_button.click(

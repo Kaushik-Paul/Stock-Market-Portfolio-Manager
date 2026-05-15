@@ -8,7 +8,7 @@ root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
 
-from main.gradio_ui.builder import create_ui as build_ui
+from main.gradio_ui.builder import LAUNCH_KWARGS, create_ui as build_ui
 
 def ensure_uvx():
     try:
@@ -22,4 +22,4 @@ def ensure_uvx():
 if __name__ == "__main__":
     ensure_uvx()
     ui = build_ui()
-    ui.launch()
+    ui.launch(**LAUNCH_KWARGS)

@@ -14,22 +14,18 @@ from main.trading.traders import Trader
 from main.utils.tracers import LogTracer
 from main.markets.market import is_market_open
 import main.utils.constants as constants
+from main.utils.model_client import configured_model_display_names, configured_model_names
 
 load_dotenv(override=True)
 
 RUN_EVERY_N_SECONDS = constants.RUN_EVERY_N_SECONDS
 RUN_EVEN_WHEN_MARKET_IS_CLOSED = constants.RUN_EVEN_WHEN_MARKET_IS_CLOSED
-USE_MANY_MODELS = constants.USE_MANY_MODELS
 
 names = ["Warren", "George", "Ray", "Cathie"]
 lastnames = ["Patience", "Bold", "Systematic", "Crypto"]
 
-if USE_MANY_MODELS:
-    model_names = constants.MANY_MODELS_NAMES
-    short_model_names = constants.MANY_MODELS_SHORT_NAMES
-else:
-    model_names = [constants.DEFAULT_MODEL_NAME] * 4
-    short_model_names = [constants.DEFAULT_MODEL_SHORT_NAME] * 4
+model_names = configured_model_names()
+short_model_names = configured_model_display_names()
 
 
 def create_traders() -> List[Trader]:
