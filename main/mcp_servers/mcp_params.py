@@ -50,9 +50,10 @@ trader_mcp_server_params = [
 
 def researcher_mcp_server_params(name: str):
     return [
+        # mcp-server-fetch has not migrated to the MCP 2.x exception API yet.
         {
             "command": "uvx",
-            "args": ["--quiet", "mcp-server-fetch"],
+            "args": ["--quiet", "--with", "mcp<2", "mcp-server-fetch"],
             "env": {"UV_NO_PROGRESS": "1"},
         },
         {
