@@ -22,6 +22,7 @@ from main.prompts.templates import (
     research_tool,
 )
 from main.mcp_servers.mcp_params import trader_mcp_server_params, researcher_mcp_server_params
+from main.utils.model_client import create_agent_model
 
 load_dotenv(override=True)
 
@@ -33,8 +34,6 @@ AgentModel = Union[str, Model]
 def get_model(model_name: AgentModel) -> AgentModel:
     """
     Return the configured model as-is.
-
-    It can be a LiteLLM-style model string or an Agents SDK Model instance.
     """
 
     return model_name
@@ -56,11 +55,16 @@ async def get_researcher_tool(mcp_servers, model_name: AgentModel) -> Tool:
 
 
 class Trader:
-    def __init__(self, name: str, lastname="Trader", model_name: AgentModel = "litellm/openrouter/x-ai/grok-4-fast:free"):
+    def __init__(
+        self,
+        name: str,
+        lastname: str = "Trader",
+        model_name: AgentModel | None = None,
+    ):
         self.name = name
         self.lastname = lastname
         self.agent = None
-        self.model_name = model_name
+        self.model_name = model_name or create_agent_model()
         self.do_trade = True
 
     async def create_agent(self, trader_mcp_servers, researcher_mcp_servers) -> Agent:
