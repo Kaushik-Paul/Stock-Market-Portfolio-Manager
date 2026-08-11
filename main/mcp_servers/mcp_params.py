@@ -12,11 +12,15 @@ load_dotenv(override=True)
 
 npm_stdio_env = {
     "NO_UPDATE_NOTIFIER": "1",
-    "NPM_CONFIG_LOGLEVEL": "silent",
+    "npm_config_audit": "false",
+    "npm_config_fund": "false",
     "npm_config_loglevel": "silent",
+    "npm_config_progress": "false",
+    "npm_config_update_notifier": "false",
 }
 brave_env = {"BRAVE_API_KEY": os.getenv("BRAVE_API_KEY"), **npm_stdio_env}
 polygon_api_key = os.getenv("POLYGON_API_KEY")
+stdio_proxy_module = "main.mcp_servers.stdio_proxy"
 
 # The MCP server for the Trader to read Market Data
 
@@ -57,13 +61,27 @@ def researcher_mcp_server_params(name: str):
             "env": {"UV_NO_PROGRESS": "1"},
         },
         {
-            "command": "npx",
-            "args": ["--yes", "--silent", "@modelcontextprotocol/server-brave-search"],
+            "command": sys.executable,
+            "args": [
+                "-m",
+                stdio_proxy_module,
+                "npx",
+                "--yes",
+                "--silent",
+                "@modelcontextprotocol/server-brave-search",
+            ],
             "env": brave_env,
         },
         {
-            "command": "npx",
-            "args": ["--yes", "--silent", "mcp-memory-libsql"],
+            "command": sys.executable,
+            "args": [
+                "-m",
+                stdio_proxy_module,
+                "npx",
+                "--yes",
+                "--silent",
+                "mcp-memory-libsql",
+            ],
             "env": {"LIBSQL_URL": f"file:./main/memory/{name}.db", **npm_stdio_env},
         },
     ]
