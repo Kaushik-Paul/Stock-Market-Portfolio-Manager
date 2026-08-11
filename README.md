@@ -60,7 +60,7 @@ This project showcases:
 - Python 3.10–3.12
 - pip or uv (recommended)
 - Node.js and npx (for MCP servers used by research; see `main/mcp_servers/mcp_params.py`)
-- OpenRouter API key or OpenCode Go API key (required for AI models)
+- Access to an OpenAI-compatible chat-completions endpoint (required for AI models)
 - Optional external services:
   - Polygon API (for real market data instead of simulated data)
   - Brave Search API (for web research capabilities)
@@ -95,28 +95,19 @@ uv sync
 pip install -r requirements.txt
 ```
 
-### 4) Create a .env file (at repo root)
-These are the environment variables the code reads. Only set what you actually use.
+### 4) Create a `.env` file (at repo root)
+Copy the example file, then configure the model endpoint and any optional integrations you use.
+
+```bash
+cp .env.example .env
+```
 
 ```ini
-# ——— Model Provider ———
-
-# Use OpenRouter when true, OpenCode Go when false.
-USE_OPENROUTER=true
-
-# OpenRouter
-OPENROUTER_API_KEY=your_openrouter_key
-OPENROUTER_MODEL=x-ai/grok-4-fast:free
-# Optional display label in the UI
-OPENROUTER_MODEL_SHORT_NAME=Grok 4 Fast
-
-# OpenCode Go
-OPENCODE_GO_API_KEY=your_opencode_go_key
-OPENCODE_GO_MODEL=minimax-m2.7
-# Optional: auto, openai, or anthropic. Leave as auto for normal use.
-OPENCODE_GO_API_STYLE=auto
-# Optional display label in the UI
-OPENCODE_GO_MODEL_SHORT_NAME=MiniMax M2.7
+# ——— Model Endpoint (required) ———
+# The endpoint must implement the OpenAI-compatible chat-completions API.
+BASE_URL=https://api.example.com/v1
+API_KEY=your_model_api_key
+MODEL=your_model_id
 
 # ——— Market Data (Polygon) ———
 # Get your API key from https://polygon.io/
@@ -164,9 +155,9 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
   - `RUN_EVERY_N_SECONDS` — cadence for trading loop
   - `RUN_EVEN_WHEN_MARKET_IS_CLOSED` — run regardless of market hours
 - __Models__: `main/utils/model_client.py`
-  - `USE_OPENROUTER=true` uses `OPENROUTER_MODEL`
-  - `USE_OPENROUTER=false` uses `OPENCODE_GO_MODEL`
-  - OpenCode Go auto-selects the OpenAI-compatible or Anthropic-compatible endpoint at runtime
+  - `BASE_URL` is the OpenAI-compatible API base URL
+  - `API_KEY` authenticates requests to that endpoint
+  - `MODEL` is the model ID used by all four traders and shown in the UI
 - __Trader strategies__: `main/prompts/reset.py`
 - __Trading loop__: `main/trading/trading_floor.py`
 - __MCP servers__: `main/mcp_servers/mcp_params.py`
@@ -187,6 +178,7 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 - __Hugging Face Space__:
   - Set `HF_TOKEN` or log in with the Hugging Face CLI
   - Set `HF_SPACE_ID=kaushikpaul/Stock-Market-Portfolio-Manager` if deploying to a different Space ID
+  - Add `API_KEY` as a Space secret and `BASE_URL`/`MODEL` as Space variables before deployment
   - Run `python scripts/deploy_space.py`
 - __General guidance__:
   - Set environment variables for any external tools you enable
@@ -197,8 +189,8 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 
 ## Troubleshooting
 - __No Polygon key__: Prices fall back to random; set `POLYGON_API_KEY` for real data. Free tier provides delayed data.
-- __Missing model API key__: If `USE_OPENROUTER=true`, set `OPENROUTER_API_KEY`. If `USE_OPENROUTER=false`, set `OPENCODE_GO_API_KEY`.
-- __Model access issues__: Ensure the selected account has access to the model specified by `OPENROUTER_MODEL` or `OPENCODE_GO_MODEL`.
+- __Missing model configuration__: Set all three required variables: `BASE_URL`, `API_KEY`, and `MODEL`.
+- __Model access issues__: Ensure `BASE_URL` exposes an OpenAI-compatible chat-completions API and that `API_KEY` can access `MODEL`.
 - __Brave Search failures__: Set `BRAVE_API_KEY` and ensure `npx` is available. Check your daily quota at [Brave Search API](https://api.search.brave.com/app/brave-usage).
 - __Email errors__: Verify `MAILJET_API_KEY` and `MAILJET_API_SECRET`. Check sender/recipient settings in `main/mcp_servers/email_server.py`.
 - __Node/npx not found__: Install Node.js (v16+) and ensure `npx` is on your PATH. On Ubuntu/Debian: `sudo apt install nodejs npm`
@@ -210,7 +202,7 @@ Open the printed local URL (e.g., http://127.0.0.1:7860).
 ## Tech Stack
 - __Python__: 3.10–3.12
 - __UI__: Gradio 5, Plotly, pandas
-- __Agents & Tools__: openai-agents, LiteLLM-style model names, MCP (FastMCP, stdio clients)
+- __Agents & Tools__: openai-agents, OpenAI-compatible model endpoints, MCP (FastMCP, stdio clients)
 - __Data__: Polygon API client (optional)
 - __Infra__: SQLite for state/logs, dotenv for config
 
