@@ -27,6 +27,7 @@ stop_requested = False
 LAUNCH_KWARGS = {
     "css": css + MODERN_CSS,
     "js": js,
+    "ssr_mode": False,
     "theme": gr.themes.Default(primary_hue="indigo"),
 }
 RUN_BUTTON_JS = """
